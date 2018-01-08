@@ -119,6 +119,7 @@ public class CrimeFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         Log.d(TAG, "onDetach");
+        //ok
     }
 
     @Override
