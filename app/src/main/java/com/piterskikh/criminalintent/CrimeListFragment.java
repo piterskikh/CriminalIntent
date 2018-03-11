@@ -1,29 +1,32 @@
 package com.piterskikh.criminalintent;
 
-
-import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.piterskikh.criminalintent.databinding.FragmentCrimeListBinding;
+
+import java.util.List;
+
 
 public class CrimeListFragment extends Fragment {
 
     private final String TAG = "CRIMELISTFRAGMENT";
-    private Crime mCrime;
-    private EditText mTitleField;
-    private Button mDateButton;
-    private CheckBox mSolvedCheckBox;
+    private FragmentCrimeListBinding binding;
+    private RecyclerView mCrimeRecyclerView;
+    private CrimeAdapter mAdapter;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,14 +38,73 @@ public class CrimeListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_crime, container, false);
-        mTitleField = v.findViewById(R.id.crime_title);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_crime_list, container, false);
+        mCrimeRecyclerView = binding.crimeRecyclerView;
+        mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        updateUi();
+        return binding.getRoot();
+    }
 
-
-        return v;
+    private void updateUi() {
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+        List<Crime> crimes = crimeLab.getCrimes();
+        mAdapter = new CrimeAdapter(crimes);
+        mCrimeRecyclerView.setAdapter(mAdapter);
     }
 
 
+    private class CrimeHolder extends RecyclerView.ViewHolder {
 
+        private Crime mCrime;
+        private TextView mTitltTextView;
+        private TextView mDateTextView;
+        private ImageView mSolvedImageView;
 
+        CrimeHolder(LayoutInflater inflater, ViewGroup parent) {
+            super(inflater.inflate(R.layout.list_crime_item, parent, false));
+            mTitltTextView = itemView.findViewById(R.id.crime_title);
+            mDateTextView = itemView.findViewById(R.id.crime_date);
+            mSolvedImageView = itemView.findViewById(R.id.crime_solved);
+            itemView.setOnClickListener(this::onclick);
+        }
+
+        private void onclick(View view) {
+            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT)
+                    .show();
+        }
+
+        void bind(Crime crime) {
+            mCrime = crime;
+            mTitltTextView.setText(mCrime.getTitle());
+            mDateTextView.setText(mCrime.getDate().toString());
+            mSolvedImageView.setVisibility(crime.isSolved() ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
+
+        private List<Crime> mCrimes;
+
+        CrimeAdapter(List<Crime> crimes) {
+            mCrimes = crimes;
+        }
+
+        @NonNull
+        @Override
+        public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            return new CrimeHolder(layoutInflater, parent);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull CrimeHolder holder, int position) {
+            Crime crime = mCrimes.get(position);
+            holder.bind(crime);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mCrimes.size();
+        }
+    }
 }
