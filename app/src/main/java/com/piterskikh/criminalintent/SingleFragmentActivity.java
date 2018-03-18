@@ -9,6 +9,8 @@ import android.view.Gravity;
 
 public abstract class SingleFragmentActivity extends AppCompatActivity {
 
+    private final String TAG = this.getClass().getSimpleName();
+
     protected abstract Fragment createFragment();
 
     @Override
@@ -18,8 +20,6 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
 
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-
-        int i = Gravity.START;
 
         if (fragment == null) {
             fragment = createFragment();

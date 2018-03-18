@@ -2,6 +2,7 @@ package com.piterskikh.criminalintent;
 
 
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,26 +18,51 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import com.piterskikh.criminalintent.databinding.FragmentCrimeBinding;
+
+import java.util.UUID;
+
 public class CrimeFragment extends Fragment {
 
+    public static final String ARG_CRIME_ID = "crime_id";
     private final String TAG = "CRIMEFRAGMENT";
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckBox;
+    private FragmentCrimeBinding binding;
+
+    public static CrimeFragment newInstance(UUID crimeID) {
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_CRIME_ID, crimeID);
+        CrimeFragment fragment = new CrimeFragment();
+        fragment.setArguments(args);
+        return  fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
+
+        UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
+        mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
     }
 
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_crime, container, false);
-        mTitleField = v.findViewById(R.id.crime_title);
+
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_crime, container, false);
+        mTitleField = binding.crimeTitle;
+        mDateButton = binding.crimeDate;
+        mSolvedCheckBox = binding.crimeSolvedBox;
+        mDateButton.setEnabled(false);
+
+        mTitleField.setText(mCrime.getTitle());
+        mSolvedCheckBox.setChecked(mCrime.isSolved());
+        mDateButton.setText(mCrime.getDate().toString());
+
 
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
@@ -55,22 +81,21 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mDateButton = v.findViewById(R.id.crime_date);
-        // mDateButton.setText(mCrime.getDate().toString());
-        mDateButton.setEnabled(false);
 
-        mSolvedCheckBox = v.findViewById(R.id.crime_solved);
+        // mDateButton.setText(mCrime.getDate().toString());
+
+
+        /*mSolvedCheckBox = v.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
             }
-        });
+        });*/
 
         Log.d(TAG, "onCreateView");
-        return v;
+        return binding.getRoot();
     }
-
 
 
     @Override

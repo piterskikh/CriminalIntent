@@ -1,5 +1,6 @@
 package com.piterskikh.criminalintent;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 import com.piterskikh.criminalintent.databinding.FragmentCrimeListBinding;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public class CrimeListFragment extends Fragment {
@@ -45,11 +47,20 @@ public class CrimeListFragment extends Fragment {
         return binding.getRoot();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUi();
+    }
+
     private void updateUi() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if(mAdapter==null) {
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }else
+            mAdapter.notifyDataSetChanged();
     }
 
 
@@ -69,8 +80,8 @@ public class CrimeListFragment extends Fragment {
         }
 
         private void onclick(View view) {
-            Toast.makeText(getActivity(), mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT)
-                    .show();
+          Intent intent = CrimePagerActivity.getIntent(mCrime.getId());
+          startActivity(intent);
         }
 
         void bind(Crime crime) {
