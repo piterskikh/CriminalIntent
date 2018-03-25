@@ -10,6 +10,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -25,7 +27,6 @@ import java.util.UUID;
 public class CrimeListFragment extends Fragment {
 
     private final String TAG = "CRIMELISTFRAGMENT";
-    private FragmentCrimeListBinding binding;
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
 
@@ -33,6 +34,7 @@ public class CrimeListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         Log.d(TAG, "onCreate");
     }
 
@@ -40,11 +42,11 @@ public class CrimeListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_crime_list, container, false);
-        mCrimeRecyclerView = binding.crimeRecyclerView;
+        final FragmentCrimeListBinding BINDING = DataBindingUtil.inflate(inflater, R.layout.fragment_crime_list, container, false);
+        mCrimeRecyclerView = BINDING.crimeRecyclerView;
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         updateUi();
-        return binding.getRoot();
+        return BINDING.getRoot();
     }
 
     @Override
@@ -56,10 +58,10 @@ public class CrimeListFragment extends Fragment {
     private void updateUi() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        if(mAdapter==null) {
+        if (mAdapter == null) {
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
-        }else
+        } else
             mAdapter.notifyDataSetChanged();
     }
 
@@ -80,8 +82,8 @@ public class CrimeListFragment extends Fragment {
         }
 
         private void onclick(View view) {
-          Intent intent = CrimePagerActivity.getIntent(mCrime.getId());
-          startActivity(intent);
+            Intent intent = CrimePagerActivity.getIntent(mCrime.getId());
+            startActivity(intent);
         }
 
         void bind(Crime crime) {
@@ -117,5 +119,11 @@ public class CrimeListFragment extends Fragment {
         public int getItemCount() {
             return mCrimes.size();
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime_list, menu);
     }
 }
