@@ -40,14 +40,19 @@ public class CrimeLab {
         return null;
     }
 
-    private void fillCrime(){
+    private void fillCrime() {
 
-        for (int i = 0; i < 100 ; i++) {
-           Crime crime = new Crime();
-           crime.setTitle("Crime #" + i);
-           crime.setSolved(i%2==0);
-           mCrimes.add(crime);
+        for (int i = 0; i < 50; i++) {
+            Crime crime = new Crime();
+            crime.setTitle("Crime #" + i);
+            crime.setSolved(i % 2 == 0);
+            mCrimes.add(crime);
         }
+
+    }
+
+    public void addCrime(Crime c) {
+        mCrimes.add(c);
 
     }
 }

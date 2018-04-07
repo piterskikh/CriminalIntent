@@ -91,10 +91,16 @@ public class CrimeFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                mCrime.setTitle(mTitleField.getText().toString());
             }
         });
 
+        mSolvedCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCrime.setSolved(mSolvedCheckBox.isChecked());
+            }
+        });
 
         Log.d(TAG, "onCreateView");
         return binding.getRoot();
