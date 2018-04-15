@@ -10,6 +10,7 @@ import com.piterskikh.criminalintent.database.CrimeCursorWrapper;
 import com.piterskikh.criminalintent.database.CrimeDbSchema;
 import com.piterskikh.criminalintent.database.CrimeDbSchema.CrimeTable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.TITLE, crime.getTitle());
         values.put(CrimeTable.Cols.DATE, crime.getDate().getTime());
         values.put(CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
+        values.put(CrimeTable.Cols.SUSPECT, crime.getmSuspect());
         return values;
     }
 
@@ -71,6 +73,11 @@ public class CrimeLab {
         Crime crime = cursor.getCrime();
         cursor.close();
         return crime;
+    }
+
+    public File getPhotoFile(Crime crime) {
+        File fileDir = mContext.getFilesDir();
+        return new File(fileDir, crime.getPhotoFilenme());
     }
 
 
