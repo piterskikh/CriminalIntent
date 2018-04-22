@@ -4,16 +4,21 @@ package com.piterskikh.criminalintent;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -31,6 +36,7 @@ import com.piterskikh.criminalintent.databinding.FragmentCrimeBinding;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class CrimeFragment extends Fragment {
@@ -39,6 +45,7 @@ public class CrimeFragment extends Fragment {
     public static final String DIALOG_DATE = "DialogDate";
     public static final int REQUEST_DATE = 0;
     public static final int REQUEST_CONTACT = 1;
+    public static final int REQUEST_PHOTO = 2;
 
     private final String TAG = "CRIMEFRAGMENT";
     private final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -52,6 +59,7 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private ImageView mPhotoView;
     private ImageButton mPhotoButton;
+    private Intent captureImage;
 
 
     public static CrimeFragment newInstance(UUID crimeID) {
@@ -127,9 +135,28 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        boolean canTakePhoto = mPhotoFile != null && captureImage.resolveActivity(getActivity().getPackageManager()) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+        mPhotoButton.setOnClickListener(this::clickPhotoButtonListener);
+
+        updatePhotoView();
+
         Log.d(TAG, "onCreateView");
         return binding.getRoot();
     }
+
+    private void clickPhotoButtonListener(View view) {
+
+        Uri uri = FileProvider.getUriForFile(getActivity(), "com.piterskikh.criminalintent.fileprovider", mPhotoFile);
+        captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        List<ResolveInfo> cameraActivites = getActivity().getPackageManager().queryIntentActivities(captureImage, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo activity : cameraActivites) {
+            getActivity().grantUriPermission(activity.activityInfo.packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        }
+        startActivityForResult(captureImage, REQUEST_PHOTO);
+    }
+
 
     private void slelectSspectAction(View view) {
         startActivityForResult(pickContact, REQUEST_CONTACT);
@@ -176,6 +203,12 @@ public class CrimeFragment extends Fragment {
             mCrime.setmSuspect(suspect);
             updateSuspect();
         }
+
+        if (requestCode == REQUEST_PHOTO) {
+            Uri uri = FileProvider.getUriForFile(getActivity(), "com.piterskikh.criminalintent.fileprovider", mPhotoFile);
+            getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            updatePhotoView();
+        }
     }
 
     private void updateDate() {
@@ -205,6 +238,15 @@ public class CrimeFragment extends Fragment {
 
         String report = getString(R.string.crime_report, mCrime.getTitle(), dateString, solvedString, suspect);
         return report;
+    }
+
+    private void updatePhotoView() {
+        if (mPhotoFile == null || !mPhotoFile.exists())
+            mPhotoView.setImageDrawable(null);
+        else {
+            Bitmap bitmap = PictureUtils.getScaleBitmap(mPhotoFile.getPath(), getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
     }
 
     @Override
