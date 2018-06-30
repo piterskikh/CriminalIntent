@@ -60,6 +60,7 @@ public class CrimeFragment extends Fragment {
     private ImageView mPhotoView;
     private ImageButton mPhotoButton;
     private Intent captureImage;
+    private Callbacks mCallbacks;
 
 
     public static CrimeFragment newInstance(UUID crimeID) {
@@ -295,13 +296,14 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        mCallbacks = null;
         Log.d(TAG, "onDetach");
-        //ok
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mCallbacks = (Callbacks) context;
         Log.d(TAG, "onAttach");
     }
 
@@ -309,5 +311,9 @@ public class CrimeFragment extends Fragment {
     public void onAttachFragment(Fragment childFragment) {
         super.onAttachFragment(childFragment);
         Log.d(TAG, "onAttachFragment");
+    }
+
+    public interface Callbacks {
+        void onCrimeUpdated();
     }
 }
